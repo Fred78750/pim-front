@@ -1,0 +1,21 @@
+@inherits LayoutComponentBase
+
+<div class="pim-layout">
+    <nav class="pim-nav">
+        <div class="pim-nav__brand">
+            <a href="/">🌿 PIM Vitajardin</a>
+        </div>
+        <ul class="pim-nav__links">
+            <li><NavLink href="/catalogue" Match="NavLinkMatch.Prefix">Catalogue</NavLink></li>
+            <li><NavLink href="/admin/taxons" Match="NavLinkMatch.Prefix">Admin</NavLink></li>
+        </ul>
+    </nav>
+
+    <main class="pim-main">
+        @Body
+    </main>
+
+    <footer class="pim-footer">
+        <span>PIM Vitajardin · <a href="https://api.vitajardin.com/docs" target="_blank">API</a></span>
+    </footer>
+</div>

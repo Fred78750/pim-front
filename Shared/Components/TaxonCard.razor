@@ -1,0 +1,29 @@
+@using Microsoft.AspNetCore.Components.Routing
+
+<a href="/taxon/@Id" class="taxon-card">
+    <div class="taxon-card__body">
+        <p class="taxon-card__designation">@Designation</p>
+        @if (!string.IsNullOrEmpty(SeoH1))
+        {
+            <p class="taxon-card__h1">@SeoH1</p>
+        }
+    </div>
+    <div class="taxon-card__footer">
+        @if (!string.IsNullOrEmpty(Categorie))
+        {
+            <span class="taxon-card__cat">@Categorie</span>
+        }
+        @if (!string.IsNullOrEmpty(MatchSource))
+        {
+            <span class="taxon-card__match">via @MatchSource</span>
+        }
+    </div>
+</a>
+
+@code {
+    [Parameter] public long Id { get; set; }
+    [Parameter] public string Designation { get; set; } = "";
+    [Parameter] public string? SeoH1 { get; set; }
+    [Parameter] public string? Categorie { get; set; }
+    [Parameter] public string? MatchSource { get; set; }
+}
