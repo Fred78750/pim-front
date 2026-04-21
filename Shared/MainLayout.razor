@@ -1,0 +1,21 @@
+@inherits LayoutComponentBase
+
+<div class="pim-layout">
+    <nav class="pim-nav">
+        <a href="/" class="pim-nav__brand">
+            <img src="/img/logo-vitajardin.png" alt="Vitajardin" />
+        </a>
+        <ul class="pim-nav__links">
+            <li><NavLink href="/catalogue" Match="NavLinkMatch.Prefix">Catalogue</NavLink></li>
+            <li><NavLink href="/admin" Match="NavLinkMatch.Prefix">Admin</NavLink></li>
+        </ul>
+    </nav>
+
+    <main class="pim-main">
+        @Body
+    </main>
+
+    <footer class="pim-footer">
+        PIM Vitajardin &copy; @DateTime.Now.Year
+    </footer>
+</div>

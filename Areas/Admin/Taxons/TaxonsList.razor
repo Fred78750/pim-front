@@ -1,0 +1,103 @@
+@page "/admin/taxons"
+@using PimFront.Models
+@using PimFront.Services
+@inject PimAdminApiClient AdminApi
+@inject PimApiClient Api
+
+<PageTitle>Taxons — PIM Admin</PageTitle>
+
+<div class="admin-taxons">
+    <div class="admin-taxons__header">
+        <h1>Taxons</h1>
+        <span class="badge">@_total.ToString("N0") taxons</span>
+    </div>
+
+    <div class="admin-taxons__search">
+        <input type="search"
+               placeholder="Rechercher..."
+               @bind="_query"
+               @bind:event="oninput"
+               @onkeyup="OnSearch" />
+    </div>
+
+    @if (_taxons == null)
+    {
+        <div class="loading">Chargement...</div>
+    }
+    else
+    {
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Désignation</th>
+                    <th>SeoName</th>
+                    <th>Catégorie ID</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var t in _taxons)
+                {
+                    <tr>
+                        <td class="mono">@t.Id</td>
+                        <td><em>@(t.GenreLibelle ?? "—") @(t.EspeceLabel ?? t.Espece ?? "") @(t.Cultivar != null ? $"'{t.Cultivar}'" : "")</em></td>
+                        <td>@(t.SeoName ?? "—")</td>
+                        <td>@(t.CategorieId?.ToString() ?? "—")</td>
+                        <td>
+                            <a href="/taxon/@t.Id" class="btn-sm">Voir</a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+        <div class="pagination">
+            <button disabled="@(_page <= 1)" @onclick="PrevPage">← Précédent</button>
+            <span>Page @_page / @_totalPages</span>
+            <button disabled="@(_page >= _totalPages)" @onclick="NextPage">Suivant →</button>
+        </div>
+    }
+</div>
+
+@code {
+    private List<TaxonListItem>? _taxons;
+    private string _query = "";
+    private int _page = 1;
+    private int _total = 0;
+    private int _totalPages = 1;
+    private CancellationTokenSource? _cts;
+
+    protected override async Task OnInitializedAsync() => await Load();
+
+    private async Task Load()
+    {
+        var result = await Api.GetTaxonsAsync(_page, 50);
+        if (result != null)
+        {
+            _taxons = result.Items;
+            _total = result.Total;
+            _totalPages = result.TotalPages;
+        }
+    }
+
+    private async Task OnSearch(KeyboardEventArgs e)
+    {
+        _cts?.Cancel();
+        _cts = new CancellationTokenSource();
+        var token = _cts.Token;
+        try
+        {
+            await Task.Delay(350, token);
+            if (string.IsNullOrWhiteSpace(_query)) { await Load(); return; }
+            var response = await Api.SearchAsync(_query, limit: 50, ct: token);
+            _taxons = response?.Results.Taxons.Select(r => new TaxonListItem(
+                r.Id, null, null, null, null, r.SeoName, null, true,
+                r.Label, null, null, null, null)).ToList();
+        }
+        catch (OperationCanceledException) { }
+    }
+
+    private async Task PrevPage() { if (_page > 1) { _page--; await Load(); } }
+    private async Task NextPage() { if (_page < _totalPages) { _page++; await Load(); } }
+}

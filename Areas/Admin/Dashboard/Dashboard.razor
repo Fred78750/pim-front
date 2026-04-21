@@ -1,0 +1,60 @@
+@page "/admin"
+@page "/admin/dashboard"
+@using PimFront.Models
+@using PimFront.Services
+@inject PimAdminApiClient AdminApi
+
+<PageTitle>Dashboard — PIM Admin</PageTitle>
+
+<div class="admin-dashboard">
+    <h1>Dashboard complétude</h1>
+
+    @if (_stats == null)
+    {
+        <div class="loading">Chargement des stats...</div>
+    }
+    else
+    {
+        <div class="stats-grid">
+
+            <div class="stat-card">
+                <span class="stat-card__value">@_stats.TotalTaxons.ToString("N0")</span>
+                <span class="stat-card__label">Taxons actifs</span>
+            </div>
+
+            <div class="stat-card @PctClass(_stats.PctFiche)">
+                <span class="stat-card__value">@_stats.PctFiche.ToString("F1")%</span>
+                <span class="stat-card__label">Avec fiche botanique</span>
+                <span class="stat-card__abs">@_stats.AvecFiche.ToString("N0")</span>
+            </div>
+
+            <div class="stat-card @PctClass(_stats.PctSeo)">
+                <span class="stat-card__value">@_stats.PctSeo.ToString("F1")%</span>
+                <span class="stat-card__label">SEO complet</span>
+                <span class="stat-card__abs">@_stats.AvecSeoH1.ToString("N0")</span>
+            </div>
+
+            <div class="stat-card">
+                <span class="stat-card__value">@_stats.AvecCategorie.ToString("N0")</span>
+                <span class="stat-card__label">Avec catégorie Niv.2</span>
+            </div>
+
+        </div>
+    }
+</div>
+
+@code {
+    private CompletudeStat? _stats;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _stats = await AdminApi.GetCompletudAsync();
+    }
+
+    private static string PctClass(double pct) => pct switch
+    {
+        >= 80 => "stat-card--ok",
+        >= 50 => "stat-card--warn",
+        _ => "stat-card--alert"
+    };
+}

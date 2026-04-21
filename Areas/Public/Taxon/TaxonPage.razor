@@ -1,0 +1,106 @@
+@page "/taxon/{Id:long}"
+@using PimFront.Models
+@using PimFront.Services
+@inject PimApiClient Api
+@inject NavigationManager Nav
+
+<PageTitle>@(_taxon?.SeoH1 ?? _taxon?.DesignationLatine ?? "Taxon") — PIM Vitajardin</PageTitle>
+
+@if (_taxon == null)
+{
+    <div class="loading">Chargement...</div>
+}
+else
+{
+    <div class="taxon-detail">
+
+        <div class="taxon-detail__header">
+            <a href="/catalogue" class="btn-back">← Catalogue</a>
+            <h1 class="taxon-detail__h1">@(_taxon.SeoH1 ?? _taxon.DesignationLatine)</h1>
+            <p class="taxon-detail__designation">
+                <em>@_taxon.DesignationLatine</em>
+            </p>
+            @if (!string.IsNullOrEmpty(_taxon.CategorieLibelle))
+            {
+                <span class="taxon-detail__cat">@_taxon.CategorieLibelle</span>
+            }
+        </div>
+
+        <div class="taxon-detail__grid">
+
+            <!-- Taxonomie -->
+            <section class="taxon-detail__section">
+                <h2>Taxonomie</h2>
+                <dl>
+                    @if (!string.IsNullOrEmpty(_taxon.GenreLibelle))
+                    {
+                        <dt>Genre</dt><dd>@_taxon.GenreLibelle</dd>
+                    }
+                    @if (!string.IsNullOrEmpty(_taxon.EspeceLibelle))
+                    {
+                        <dt>Espèce</dt><dd>@_taxon.EspeceLibelle</dd>
+                    }
+                    @if (!string.IsNullOrEmpty(_taxon.Cultivar))
+                    {
+                        <dt>Cultivar</dt><dd>'@_taxon.Cultivar'</dd>
+                    }
+                    <dt>Type</dt><dd>@(_taxon.TypeHorticulture ?? "—")</dd>
+                </dl>
+            </section>
+
+            <!-- Noms commerciaux -->
+            @if (_taxon.NomsCommerciaux.Count > 0)
+            {
+                <section class="taxon-detail__section">
+                    <h2>Noms commerciaux</h2>
+                    <ul class="tag-list">
+                        @foreach (var nc in _taxon.NomsCommerciaux)
+                        {
+                            <li class="tag">@nc.Libelle</li>
+                        }
+                    </ul>
+                </section>
+            }
+
+            <!-- Synonymes -->
+            @if (_taxon.Synonymes.Count > 0)
+            {
+                <section class="taxon-detail__section">
+                    <h2>Synonymes</h2>
+                    <ul class="tag-list">
+                        @foreach (var s in _taxon.Synonymes)
+                        {
+                            <li class="tag tag--synonyme">
+                                @s.Libelle
+                                <span class="tag__type">@s.Type</span>
+                            </li>
+                        }
+                    </ul>
+                </section>
+            }
+
+            <!-- Fiche botanique -->
+            @if (_taxon.FicheBotanique != null)
+            {
+                <section class="taxon-detail__section">
+                    <h2>Fiche botanique</h2>
+                    <p>@_taxon.FicheBotanique.NomCourant</p>
+                    <p class="text-muted">Type : @_taxon.FicheBotanique.TypeFiche</p>
+                </section>
+            }
+
+        </div>
+
+    </div>
+}
+
+@code {
+    [Parameter] public long Id { get; set; }
+    private TaxonDetail? _taxon;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        _taxon = null;
+        _taxon = await Api.GetTaxonAsync(Id);
+    }
+}

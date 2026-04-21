@@ -1,0 +1,90 @@
+@using Microsoft.AspNetCore.Components.Routing
+
+<a href="/taxon/@Id" class="taxon-card">
+    <div class="taxon-card__body">
+        <p class="taxon-card__designation">
+            @((MarkupString)BuildDesignation())
+        </p>
+        @if (!string.IsNullOrEmpty(NomCommercial))
+        {
+            <p class="taxon-card__nc">@NomCommercial.ToUpper()</p>
+        }
+    </div>
+    <div class="taxon-card__footer">
+        @if (!string.IsNullOrEmpty(CategorieLibelle))
+        {
+            <span class="taxon-card__cat">@CategorieLibelle</span>
+        }
+        @if (StatutConfiance == "verifie")
+        {
+            <span class="taxon-card__verified" title="Taxon vérifié">✓</span>
+        }
+    </div>
+</a>
+
+@code {
+    [Parameter] public long Id { get; set; }
+    [Parameter] public string? GenreLibelle { get; set; }
+    [Parameter] public string? EspeceLabel { get; set; }
+    [Parameter] public string? SousEspeceLabel { get; set; }
+    [Parameter] public string? VarieteLabel { get; set; }
+    [Parameter] public string? Cultivar { get; set; }
+    [Parameter] public string? NomCommercial { get; set; }
+    [Parameter] public string? SeoName { get; set; }
+    [Parameter] public string? CategorieLibelle { get; set; }
+    [Parameter] public string? StatutConfiance { get; set; }
+
+    /// <summary>
+    /// Construit la désignation selon les règles CINPC / Horti'doc 2010 :
+    /// - Genre + espèce en italique
+    /// - subsp. / var. / f. en romain
+    /// - 'Cultivar' en romain entre guillemets simples
+    /// - NOM COMMERCIAL en petites majuscules romain (affiché séparément)
+    /// </summary>
+    private string BuildDesignation()
+    {
+        var parts = new System.Text.StringBuilder();
+
+        // Genre — italique, 1ère lettre majuscule
+        if (!string.IsNullOrEmpty(GenreLibelle))
+        {
+            var genre = char.ToUpper(GenreLibelle[0]) + GenreLibelle[1..].ToLower();
+            parts.Append($"<em>{System.Net.WebUtility.HtmlEncode(genre)}</em>");
+        }
+
+        // Espèce — italique, tout en minuscules
+        if (!string.IsNullOrEmpty(EspeceLabel))
+        {
+            parts.Append($" <em>{System.Net.WebUtility.HtmlEncode(EspeceLabel.ToLower())}</em>");
+        }
+
+        // Sous-espèce — "subsp." romain + épithète italique
+        if (!string.IsNullOrEmpty(SousEspeceLabel))
+        {
+            parts.Append($" subsp. <em>{System.Net.WebUtility.HtmlEncode(SousEspeceLabel.ToLower())}</em>");
+        }
+
+        // Variété — "var." romain + épithète italique
+        if (!string.IsNullOrEmpty(VarieteLabel))
+        {
+            parts.Append($" var. <em>{System.Net.WebUtility.HtmlEncode(VarieteLabel.ToLower())}</em>");
+        }
+
+        // Cultivar — romain, guillemets simples anglais, 1ère lettre majuscule par mot
+        if (!string.IsNullOrEmpty(Cultivar))
+        {
+            var cultivar = ToTitleCase(Cultivar);
+            parts.Append($" \u2018{System.Net.WebUtility.HtmlEncode(cultivar)}\u2019");
+        }
+
+        // Fallback sur SeoName si rien
+        if (parts.Length == 0 && !string.IsNullOrEmpty(SeoName))
+            parts.Append(System.Net.WebUtility.HtmlEncode(SeoName));
+
+        return parts.ToString();
+    }
+
+    private static string ToTitleCase(string s) =>
+        string.IsNullOrEmpty(s) ? s :
+        System.Globalization.CultureInfo.InvariantCulture.TextInfo.ToTitleCase(s.ToLower());
+}
