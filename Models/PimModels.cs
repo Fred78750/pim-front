@@ -48,7 +48,7 @@ public record SynonymeRef(long Id, string Libelle, string Type);
 
 public record PagedResult<T>(
     List<T> Items,
-    int Total,
+    [property: JsonPropertyName("total")]     int Total,
     int Page,
     [property: JsonPropertyName("page_size")] int PageSize
 )
@@ -73,28 +73,23 @@ public record CategorieNiv2(
 
 // ─── Recherche ────────────────────────────────────────────────────────────────
 
-public record SearchHit(
-    long Id,
-    string Label,
-    double Score,
-    string Type,
-    [property: JsonPropertyName("seo_name")]  string? SeoName,
-    string? Categorie,
-    [property: JsonPropertyName("taxon_id")] long? TaxonId
+public record SearchResponse(
+    [property: JsonPropertyName("total_hits")] int TotalHits,
+    [property: JsonPropertyName("results")]    SearchResultGroups Results
 );
 
 public record SearchResultGroups(
-    List<SearchHit> Taxons,
-    List<SearchHit> Synonymes,
+    [property: JsonPropertyName("taxons")]           List<SearchHit> Taxons,
+    [property: JsonPropertyName("synonymes")]        List<SearchHit> Synonymes,
     [property: JsonPropertyName("noms_commerciaux")] List<SearchHit> NomsCommerciaux,
-    List<SearchHit> Categories
+    [property: JsonPropertyName("categories")]       List<SearchHit> Categories
 );
 
-public record SearchResponse(
-    string Query,
-    [property: JsonPropertyName("total_hits")] int TotalHits,
-    SearchResultGroups Results,
-    [property: JsonPropertyName("duration_ms")] int DurationMs
+public record SearchHit(
+    [property: JsonPropertyName("taxon_id")]  long? Id,
+    [property: JsonPropertyName("label")]     string Label,
+    [property: JsonPropertyName("seo_name")]  string? SeoName,
+    [property: JsonPropertyName("categorie")] string? Categorie
 );
 
 // ─── Catégorie lookup (cache local) ──────────────────────────────────────────

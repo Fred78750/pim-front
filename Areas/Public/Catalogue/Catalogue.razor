@@ -58,10 +58,11 @@
         <div class="taxon-grid">
             @foreach (var r in _searchResponse.Results.Taxons)
             {
-                <TaxonCard Id="r.Id"
-                           Designation="@r.Label"
+                <TaxonCard Id="@(r.Id ?? 0)"
+                           GenreLibelle="@r.Label"
                            SeoName="@r.SeoName"
-                           CategorieLibelle="@r.Categorie" />
+                           CategorieLibelle="@r.Categorie"
+                           StatutConfiance="verifie" />
             }
         </div>
     }

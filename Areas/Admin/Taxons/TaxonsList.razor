@@ -92,7 +92,7 @@
             if (string.IsNullOrWhiteSpace(_query)) { await Load(); return; }
             var response = await Api.SearchAsync(_query, limit: 50, ct: token);
             _taxons = response?.Results.Taxons.Select(r => new TaxonListItem(
-                r.Id, null, null, null, null, r.SeoName, null, true,
+                r.Id ?? 0, null, null, null, null, r.SeoName, null, true,
                 r.Label, null, null, null, null)).ToList();
         }
         catch (OperationCanceledException) { }
